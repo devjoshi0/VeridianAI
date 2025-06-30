@@ -16,16 +16,10 @@ export default defineNuxtPlugin(() => {
     measurementId: config.firebaseMeasurementId,
   }
 
-  if (process.client) {
-    // @ts-ignore
-    console.log('CLIENT FIREBASE CONFIG:', firebaseConfig)
-  }
-
   const app = !getApps().length ? initializeApp(firebaseConfig) : getApps()[0]
   const auth = getAuth(app)
   const db = getFirestore(app)
 
-  // Make Firebase services available via Nuxt app context
   return {
     provide: {
       firebaseApp: app,

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function SignupPage() {
   const { register, error, loading } = useAuth();
@@ -11,6 +12,7 @@ export default function SignupPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [formError, setFormError] = useState<string | null>(null);
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,6 +26,9 @@ export default function SignupPage() {
       return;
     }
     await register(email, password);
+    if (!error) {
+      router.push("/");
+    }
   };
 
   return (

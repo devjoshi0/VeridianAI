@@ -20,8 +20,8 @@ export default function LoginPage() {
       setFormError("Please fill in all fields.");
       return;
     }
-    await login(email, password);
-    if (!error) {
+    const success = await login(email, password);
+    if (success) {
       router.push("/settings");
     }
   };

@@ -3,14 +3,14 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { User, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "firebase/auth";
 import { auth, firestore } from "../../lib/firebase";
-import { setDoc, doc } from "firebase/firestore";
+import { setDoc, doc, getDoc } from "firebase/firestore";
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
   error: string | null;
-  login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<boolean>;
+  register: (email: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
 }
 
@@ -30,9 +30,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      console.log("Auth state changed:", user);
       setUser(user);
       setLoading(false);
+      // Ensure user document exists in Firestore on login
+      if (user) {
+        const userDocRef = doc(firestore, "users", user.uid);
+        const userDocSnap = await getDoc(userDocRef);
+        if (!userDocSnap.exists()) {
+          await setDoc(userDocRef, {
+            email: user.email,
+            createdAt: new Date(),
+            topics: [],
+          });
+          console.log("Created user doc for login:", user.uid);
+        }
+      }
     });
     return () => unsubscribe();
   }, []);
@@ -41,9 +55,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setLoading(true);
     setError(null);
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const result = await signInWithEmailAndPassword(auth, email, password);
+      console.log("Login success:", result.user.uid);
+      return true;
     } catch (err: any) {
       setError(err.message);
+      console.error("Login error:", err);
+      return false;
     } finally {
       setLoading(false);
     }
@@ -58,9 +76,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       await setDoc(doc(firestore, "users", userCredential.user.uid), {
         email: userCredential.user.email,
         createdAt: new Date(),
+        topics: [],
       });
+      console.log("Register success:", userCredential.user.uid);
+      return true;
     } catch (err: any) {
       setError(err.message);
+      console.error("Register error:", err);
+      return false;
     } finally {
       setLoading(false);
     }

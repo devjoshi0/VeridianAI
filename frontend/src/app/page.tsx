@@ -45,7 +45,7 @@ export default function Home() {
       </motion.div>
       <div className="fixed top-6 left-8 text-2xl font-bold text-pink-200 select-none opacity-80">
         AuthGlass
-      </div>
+        </div>
       <div className="fixed top-6 right-8 flex gap-2">
         {loading ? null : user ? (
           <button

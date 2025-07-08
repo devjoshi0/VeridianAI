@@ -35,7 +35,7 @@ export default function RootLayout({
           <AnimatedGradientBackground />
           <LightDarkToggle />
           <AuthProvider>
-            {children}
+        {children}
           </AuthProvider>
         </ThemeProvider>
       </body>

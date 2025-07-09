@@ -12,6 +12,8 @@ import urllib.parse
 from newspaper import Article
 from transformers import pipeline
 from sentence_transformers import SentenceTransformer, util
+import sib_api_v3_sdk
+from sib_api_v3_sdk.rest import ApiException
 
 # Load environment variables
 load_dotenv()
@@ -232,29 +234,39 @@ def store_newsletters_in_firestore(newsletters: Dict[str, Dict[str, Any]]) -> No
         except Exception as e:
             print(f"Failed to store newsletter for user {user_id}: {e}")
 
-MAILGUN_API_KEY = os.getenv('MAILGUN_API_KEY')
-MAILGUN_DOMAIN = os.getenv('MAILGUN_DOMAIN')
-MAILGUN_FROM_EMAIL = os.getenv('MAILGUN_FROM_EMAIL')
+# Remove Mailgun environment variables
+# Add Brevo environment variables
+BREVO_API_KEY = os.getenv('BREVO_API_KEY')
+BREVO_SENDER_EMAIL = os.getenv('BREVO_SENDER_EMAIL')
+BREVO_SENDER_NAME = os.getenv('BREVO_SENDER_NAME', 'AI Newsletter')
 
-def send_newsletter_mailgun(to_email, subject, html_content):
-    if not (MAILGUN_API_KEY and MAILGUN_DOMAIN and MAILGUN_FROM_EMAIL):
-        print("Mailgun environment variables not set.")
+def send_newsletter_brevo(to_email, subject, html_content):
+    if not (BREVO_API_KEY and BREVO_SENDER_EMAIL):
+        print("Brevo environment variables not set.")
         return False
-    response = requests.post(
-        f"https://api.mailgun.net/v3/{MAILGUN_DOMAIN}/messages",
-        auth=("api", MAILGUN_API_KEY),
-        data={
-            "from": MAILGUN_FROM_EMAIL,
-            "to": [to_email],
-            "subject": subject,
-            "html": html_content
-        }
+    configuration = sib_api_v3_sdk.Configuration()
+    configuration.api_key['api-key'] = BREVO_API_KEY
+    api_instance = sib_api_v3_sdk.TransactionalEmailsApi(sib_api_v3_sdk.ApiClient(configuration))
+    send_smtp_email = sib_api_v3_sdk.SendSmtpEmail(
+        to=[{"email": to_email}],
+        sender={"email": BREVO_SENDER_EMAIL, "name": BREVO_SENDER_NAME},
+        subject=subject,
+        html_content=html_content
     )
-    return response
+    try:
+        response = api_instance.send_transac_email(send_smtp_email)
+        print("Brevo response:", response)
+        return response
+    except ApiException as e:
+        print(f"❌ Failed to send newsletter to {to_email}: {e}")
+        return None
 
-def render_newsletter_html(newsletter):
-    # Only topics in newsletter['sections'] (i.e., user-selected topics) are rendered below
-    # Emoji/icon mapping for topics (customize as needed)
+def render_newsletter_html(newsletter, compatibility_mode=False):
+    """
+    Renders the newsletter HTML.
+    If compatibility_mode is True, uses a table-based, light-background template for maximum email compatibility.
+    If False, uses a modern look (light background, dark text, no external images).
+    """
     topic_icons = {
         'science': '🔬',
         'sports': '🏅',
@@ -262,33 +274,8 @@ def render_newsletter_html(newsletter):
         'entertainment': '🎬',
         'general': '📰',
     }
-    # Inline CSS for email compatibility
-    style = '''
-    <style>
-      body { font-family: Arial, sans-serif; background: #181a1b; color: #fff; margin: 0; padding: 0; }
-      .newsletter-container { max-width: 600px; margin: 0 auto; background: #23272a; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px #0003; }
-      .header { background: #181a1b; padding: 24px 24px 8px 24px; text-align: center; }
-      .header .date { color: #aaa; font-size: 14px; margin-bottom: 8px; }
-      .header h1 { margin: 0 0 8px 0; font-size: 28px; color: #fff; }
-      .greeting { font-size: 16px; color: #eee; margin-bottom: 16px; }
-      .toc { background: #23272a; padding: 16px 24px; border-bottom: 1px solid #333; }
-      .toc h2 { font-size: 18px; color: #fff; margin: 0 0 8px 0; }
-      .toc ul { padding-left: 20px; margin: 0; }
-      .toc li { font-size: 15px; margin-bottom: 4px; color: #fff; }
-      .main { padding: 24px; }
-      .article { margin-bottom: 32px; }
-      .article h3 { margin: 0 0 8px 0; font-size: 20px; color: #fff; }
-      .article a { color: #4ea1f7; text-decoration: none; }
-      .article ul { margin: 0 0 0 20px; color: #eee; }
-      .footer { background: #181a1b; color: #aaa; text-align: center; font-size: 13px; padding: 16px 24px; border-top: 1px solid #333; }
-      .footer a { color: #4ea1f7; text-decoration: underline; }
-      .social-icons img { width: 24px; height: 24px; margin: 0 4px; vertical-align: middle; }
-    </style>
-    '''
-    # Date header
     from datetime import datetime
     date_str = datetime.strptime(newsletter['date'], '%Y-%m-%d').strftime('%A %d %B %Y')
-    # Table of contents (headlines)
     toc_items = []
     article_anchors = []
     anchor_count = 1
@@ -296,55 +283,123 @@ def render_newsletter_html(newsletter):
         icon = topic_icons.get(section['topic'], '📰')
         for article in section['articles']:
             anchor = f"article{anchor_count}"
-            toc_items.append(f'<li>{icon} <a href="#{anchor}" style="color:#4ea1f7;text-decoration:none;">{article["header"]}</a></li>')
+            toc_items.append((anchor, icon, article))
             article_anchors.append((anchor, icon, article))
             anchor_count += 1
-    # Main content
-    main_html = ""
-    for anchor, icon, article in article_anchors:
-        main_html += f'''<div class="article">
-          <h3 id="{anchor}">{icon} {article['header']} <a href="{article['url']}" target="_blank">LINK</a></h3>
-          <ul>'''
-        # Try to split summary into bullet points if possible
-        summary = article['summary']
-        bullets = [s.strip() for s in summary.split('\n') if s.strip()]
-        if len(bullets) > 1:
-            for bullet in bullets:
-                main_html += f'<li>{bullet}</li>'
-        else:
-            main_html += f'<li>{summary}</li>'
-        main_html += '</ul></div>'
-    # Social icons (optional, can add your own links)
-    social_html = '''<div class="social-icons">
-      <a href="https://twitter.com/"><img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/x.svg" alt="X" /></a>
-      <a href="https://instagram.com/"><img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/instagram.svg" alt="Instagram" /></a>
-      <a href="https://github.com/"><img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/github.svg" alt="GitHub" /></a>
-      <a href="https://spotify.com/"><img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/spotify.svg" alt="Spotify" /></a>
-    </div>'''
-    # Full HTML
-    html = f'''<!DOCTYPE html>
-<html><head><meta charset="UTF-8">{style}</head><body style="background:#181a1b;">
+
+    if compatibility_mode:
+        # Table-based, maximum compatibility template
+        toc_rows = [f'<tr><td style="padding:2px 0;font-size:15px;">{icon} <a href="#{anchor}" style="color:#1a73e8;text-decoration:none;">{article["header"]}</a></td></tr>' for anchor, icon, article in toc_items]
+        main_html = ""
+        for anchor, icon, article in article_anchors:
+            summary = article['summary']
+            bullets = [s.strip() for s in summary.split('\n') if s.strip()]
+            bullet_html = "".join([f"<li>{b}</li>" for b in bullets]) if len(bullets) > 1 else f"<li>{summary}</li>"
+            main_html += f"""
+            <tr>
+                <td style=\"padding:16px 0 0 0;\">
+                    <h3 id=\"{anchor}\" style=\"margin:0 0 8px 0;font-size:20px;color:#222;\">{icon} {article['header']} <a href=\"{article['url']}\" target=_blank style=\"color:#1a73e8;text-decoration:none;\">LINK</a></h3>
+                    <ul style=\"margin:0 0 0 20px;padding:0;color:#333;\">{bullet_html}</ul>
+                </td>
+            </tr>
+            """
+        html = f"""<!DOCTYPE html>
+<html>
+<head>
+  <meta charset=\"UTF-8\">
+  <title>Your Daily AI Newsletter</title>
+</head>
+<body style=\"background:#f7f7f7;margin:0;padding:0;\">
+  <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"background:#f7f7f7;\">
+    <tr>
+      <td align=\"center\">
+        <table width=\"600\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"background:#fff;border-radius:8px;box-shadow:0 2px 8px #0001;margin:24px 0;\">
+          <tr>
+            <td style=\"padding:24px 24px 8px 24px;text-align:center;\">
+              <div style=\"color:#888;font-size:14px;margin-bottom:8px;\">{date_str}</div>
+              <h1 style=\"margin:0 0 8px 0;font-size:28px;color:#222;\">Your Daily AI Newsletter</h1>
+              <div style=\"font-size:16px;color:#444;margin-bottom:16px;\">Hi there, this is your daily AI Newsletter.</div>
+            </td>
+          </tr>
+          <tr>
+            <td style=\"background:#f0f0f0;padding:16px 24px;border-bottom:1px solid #eee;\">
+              <h2 style=\"font-size:18px;color:#222;margin:0 0 8px 0;\">In today's newsletter:</h2>
+              <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">{''.join(toc_rows)}</table>
+            </td>
+          </tr>
+          {main_html}
+          <tr>
+            <td style=\"background:#f0f0f0;color:#888;text-align:center;font-size:13px;padding:16px 24px;border-top:1px solid #eee;\">
+              <div style=\"margin-top:8px;\">Not subscribed? <a href=\"#\" style=\"color:#1a73e8;text-decoration:underline;\">Subscribe for free</a></div>
+              <div style=\"margin-top:8px;\">Update your email preferences or <a href=\"#\" style=\"color:#1a73e8;text-decoration:underline;\">unsubscribe here</a></div>
+              <div style=\"margin-top:8px;\">© {datetime.now().year} Your Newsletter</div>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+"""
+        return html
+    else:
+        # Modern look, light background, dark text, no external images
+        style = '''
+        <style>
+          body { font-family: Arial, sans-serif; background: #f7f7f7; color: #222; margin: 0; padding: 0; }
+          .newsletter-container { max-width: 600px; margin: 0 auto; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px #0001; }
+          .header { background: #f7f7f7; padding: 24px 24px 8px 24px; text-align: center; }
+          .header .date { color: #888; font-size: 14px; margin-bottom: 8px; }
+          .header h1 { margin: 0 0 8px 0; font-size: 28px; color: #222; }
+          .greeting { font-size: 16px; color: #444; margin-bottom: 16px; }
+          .toc { background: #f0f0f0; padding: 16px 24px; border-bottom: 1px solid #eee; }
+          .toc h2 { font-size: 18px; color: #222; margin: 0 0 8px 0; }
+          .toc ul { padding-left: 20px; margin: 0; }
+          .toc li { font-size: 15px; margin-bottom: 4px; color: #222; }
+          .main { padding: 24px; }
+          .article { margin-bottom: 32px; }
+          .article h3 { margin: 0 0 8px 0; font-size: 20px; color: #222; }
+          .article a { color: #1a73e8; text-decoration: none; }
+          .article ul { margin: 0 0 0 20px; color: #333; }
+          .footer { background: #f7f7f7; color: #888; text-align: center; font-size: 13px; padding: 16px 24px; border-top: 1px solid #eee; }
+          .footer a { color: #1a73e8; text-decoration: underline; }
+        </style>
+        '''
+        toc_html = ''.join([f'<li>{icon} <a href="#{anchor}" style="color:#1a73e8;text-decoration:none;">{article["header"]}</a></li>' for anchor, icon, article in toc_items])
+        main_html = ""
+        for anchor, icon, article in article_anchors:
+            summary = article['summary']
+            bullets = [s.strip() for s in summary.split('\n') if s.strip()]
+            if len(bullets) > 1:
+                bullet_html = ''.join([f'<li>{b}</li>' for b in bullets])
+            else:
+                bullet_html = f'<li>{summary}</li>'
+            main_html += f'''<div class="article">
+              <h3 id="{anchor}">{icon} {article['header']} <a href="{article['url']}" target="_blank">LINK</a></h3>
+              <ul>{bullet_html}</ul>
+            </div>'''
+        html = f'''<!DOCTYPE html>
+<html><head><meta charset="UTF-8">{style}</head><body style="background:#f7f7f7;">
 <div class="newsletter-container">
   <div class="header">
     <div class="date">{date_str}</div>
-    <!-- <img src="https://yourdomain.com/logo.png" alt="Logo" style="height:48px;margin-bottom:8px;" /> -->
     <h1>Your Daily AI Newsletter</h1>
     <div class="greeting">Hi there, this is your daily AI Newsletter.</div>
   </div>
   <div class="toc">
     <h2>In today's newsletter:</h2>
-    <ul>{''.join(toc_items)}</ul>
+    <ul>{toc_html}</ul>
   </div>
   <div class="main">{main_html}</div>
   <div class="footer">
-    {social_html}
     <div style="margin-top:8px;">Not subscribed? <a href="#">Subscribe for free</a></div>
     <div style="margin-top:8px;">Update your email preferences or <a href="#">unsubscribe here</a></div>
     <div style="margin-top:8px;">© {datetime.now().year} Your Newsletter</div>
   </div>
 </div>
 </body></html>'''
-    return html
+        return html
 
 def create_and_send_newsletters(newsletters: Dict[str, Dict[str, Any]]):
     today = datetime.now(UTC).date()
@@ -360,13 +415,13 @@ def create_and_send_newsletters(newsletters: Dict[str, Dict[str, Any]]):
             continue
         html_content = render_newsletter_html(newsletter)
         subject = f"Your AI Newsletter for {today}"
-        response = send_newsletter_mailgun(user_email, subject, html_content)
-        if response and response.status_code == 200:
+        response = send_newsletter_brevo(user_email, subject, html_content)
+        if response and hasattr(response, 'message_id'):
             print(f"✅ Newsletter sent to {user_email}")
             # Mark as delivered in Firestore
             db.collection('newsletters').document(f"{user_id}_{today}").update({"delivered": True})
         else:
-            print(f"❌ Failed to send newsletter to {user_email}: {response.text if response else 'No response'}")
+            print(f"❌ Failed to send newsletter to {user_email}: {response if response else 'No response'}")
 
 
 # --- Main Pipeline Orchestrator ---
@@ -417,8 +472,8 @@ def main():
     else:
         print("❌ No newsletters were created.")
     
-    # Step 6: Send newsletters via Mailgun
-    print("\n✉️ Step 6: Sending newsletters via Mailgun...")
+    # Step 6: Send newsletters via Brevo
+    print("\n✉️ Step 6: Sending newsletters via Brevo...")
     create_and_send_newsletters(newsletters)
     
     print("\n🎉 AI Pipeline completed successfully!")

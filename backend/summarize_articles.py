@@ -86,7 +86,7 @@ for topic in topics:
 
         # Summarize the article
         try:
-            summary = summarizer(text, max_length=1000, min_length=50, do_sample=False)[0]['summary_text']
+            summary = summarizer(text, max_length=10000, min_length=50, do_sample=False)[0]['summary_text']
         except Exception as e: 
             print(f"    Summarization failed: {e}")
             continue

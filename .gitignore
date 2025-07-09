@@ -61,3 +61,6 @@ logs/
 # News and summaries (these are now stored in Firestore)
 news/
 summaries/ 
+
+Dockerfile
+.dockerignore

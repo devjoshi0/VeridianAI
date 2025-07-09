@@ -19,18 +19,20 @@ export default function TopicSelectionDashboard() {
   const [saving, setSaving] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
 
+  const topics = ['general', 'science', 'sports', 'tech', 'entertainment'];
+
   useEffect(() => {
     if (!user) return;
     setIsLoading(true);
 
     // Fetch master topics
     const fetchTopics = async () => {
-      const topicsSnap = await getDocs(collection(firestore, "topics"));
-      const topics: Topic[] = [];
-      topicsSnap.forEach(doc => {
-        topics.push({ id: doc.id, ...doc.data() } as Topic);
-      });
-      setAvailableTopics(topics);
+      // const topicsSnap = await getDocs(collection(firestore, "topics"));
+      // const topics: Topic[] = [];
+      // topicsSnap.forEach(doc => {
+      //   topics.push({ id: doc.id, ...doc.data() } as Topic);
+      // });
+      setAvailableTopics(topics.map(topic => ({ id: topic, name: topic })));
 
       // Fetch user preferences
       const userDoc = await getDoc(doc(firestore, "users", user.uid));
@@ -90,7 +92,7 @@ export default function TopicSelectionDashboard() {
               onChange={() => handleCheckboxChange(topic.name)}
               className="accent-pink-400 w-5 h-5"
             />
-            <span className="font-medium text-black dark:text-white">{topic.name}</span>
+            <span className="font-medium text-black dark:text-white capitalize">{topic.name}</span>
             <span className="text-xs text-gray-700 dark:text-gray-300 ml-2">{topic.description}</span>
           </label>
         ))}

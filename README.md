@@ -8,6 +8,8 @@
 
 VeridianAI is an end-to-end platform that delivers personalized, AI-generated news summaries to users based on their selected topics. The system leverages state-of-the-art NLP models and a modern web stack to automate news aggregation, summarization, and delivery, providing a seamless and engaging user experience.
 
+If you want to see the deployed app, go to [VeridianAI](https://verdianai.vercel.app). Sign up now and enjoy free newsletters every morning at 8am EST and catch up on your interested topics in a quick bite sized read!
+
 ---
 
 ## Table of Contents
@@ -18,7 +20,6 @@ VeridianAI is an end-to-end platform that delivers personalized, AI-generated ne
 - [Screenshots & Suggested Images](#screenshots--suggested-images)
 - [Getting Started](#getting-started)
 - [Folder Structure](#folder-structure)
-- [For Recruiters](#for-recruiters)
 - [License](#license)
 
 ---
@@ -49,7 +50,7 @@ VeridianAI is an end-to-end platform that delivers personalized, AI-generated ne
 ### **Backend**
 - **Language:** Python 3
 - **AI/NLP:** Hugging Face Transformers (`facebook/bart-large-cnn`), Sentence Transformers (`all-MiniLM-L6-v2`)
-- **News Parsing:** newspaper3k
+- **News Parsing:** newspaper3k and thenewsapi
 - **Database:** Google Firestore (via `firebase-admin`)
 - **Environment:** python-dotenv
 - **Email Delivery:** Brevo (Sendinblue) API
@@ -129,13 +130,6 @@ AI Newsletter Project/
   frontend/        # Next.js React app, user auth, topic selection, UI
 ```
 
----
-
-## For Recruiters
-
-- **Software Engineering:** Demonstrates full-stack skills, cloud integration, and modern UI/UX.
-- **AI Engineering:** End-to-end NLP pipeline, model orchestration, and scalable summarization.
-- **Extensible:** Easily add new topics, models, or delivery channels.
 
 ---
 

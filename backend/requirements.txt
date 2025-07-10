@@ -6,3 +6,5 @@ newspaper3k==0.2.8
 requests==2.31.0
 python-dotenv==1.0.0
 sentence-transformers>=2.2.0
+lxml_html_clean
+lxml[html_clean]

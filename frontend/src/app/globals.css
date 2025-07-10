@@ -19,8 +19,61 @@
   }
 }
 
+/* Animated gradient background */
+.bg-gradient-animated {
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  z-index: -2;
+  background: radial-gradient(circle at 20% 20%, #fbc2eb 0%, #a1c4fd 40%, transparent 70%),
+              radial-gradient(circle at 80% 60%, #c2e9fb 0%, #fcb69f 40%, transparent 70%);
+  animation: gradientMove 18s ease-in-out infinite;
+  background-size: 200% 200%;
+}
+
+@keyframes gradientMove {
+  0% { background-position: 0% 50%, 100% 50%; }
+  50% { background-position: 100% 50%, 0% 50%; }
+  100% { background-position: 0% 50%, 100% 50%; }
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  min-height: 100vh;
+  margin: 0;
+  font-family: 'Inter', 'San Francisco', 'Segoe UI', Arial, sans-serif;
+  background: #f8f8ff;
+  position: relative;
+  overflow-x: hidden;
+}
+
+::-webkit-scrollbar {
+  width: 0px;
+  background: transparent;
+}
+
+.liquid-gradient {
+  background: linear-gradient(120deg, #a1c4fd 0%, #c2e9fb 50%, #fbc2eb 100%);
+  background-size: 200% 200%;
+  animation: liquidMove 3s ease-in-out infinite;
+  opacity: 0.85;
+}
+
+@keyframes liquidMove {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }

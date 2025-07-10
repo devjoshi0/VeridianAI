@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { collection, getDocs, doc, getDoc, updateDoc } from "firebase/firestore";
 import { firestore } from "../../../lib/firebase";
 import { useAuth } from "../../contexts/AuthContext";
+import { motion } from "framer-motion";
 
 interface Topic {
   id: string;
@@ -82,30 +83,50 @@ export default function TopicSelectionDashboard() {
 
   return (
     <div className="w-full max-w-md mx-auto">
-      <h2 className="text-xl font-bold mb-4 text-center text-black dark:text-white">Select Your Topics</h2>
+      <h2 className="text-xl font-bold mb-4 text-center text-black">Select Your Topics</h2>
       <form className="flex flex-col gap-4">
-        {availableTopics.map(topic => (
-          <label key={topic.id} className="flex items-center gap-2 bg-white/70 dark:bg-black/30 rounded-xl px-3 py-2 shadow ring-1 ring-white/40 dark:ring-white/10 border border-white/20 dark:border-white/10 backdrop-blur-xl">
-            <input
-              type="checkbox"
-              checked={userSelectedTopics.has(topic.name)}
-              onChange={() => handleCheckboxChange(topic.name)}
-              className="accent-pink-400 w-5 h-5"
-            />
-            <span className="font-medium text-black dark:text-white capitalize">{topic.name}</span>
-            <span className="text-xs text-gray-700 dark:text-gray-300 ml-2">{topic.description}</span>
-          </label>
-        ))}
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 justify-items-center">
+          {availableTopics.map(topic => {
+            const selected = userSelectedTopics.has(topic.name);
+            return (
+              <motion.button
+                key={topic.id}
+                type="button"
+                onClick={() => handleCheckboxChange(topic.name)}
+                whileHover={{ scale: 1.08 }}
+                whileTap={{ scale: 0.98 }}
+                transition={{ type: 'spring', stiffness: 1, damping: 2 }}
+                className={`px-5 py-3 rounded-xl font-medium text-lg transition-all duration-200 border border-white/30 backdrop-blur-xl focus:outline-none flex items-center justify-center text-center w-full h-full
+                  ${selected
+                    ? "liquid-gradient text-black shadow-lg"
+                    : "bg-white/40 text-black shadow border border-white/30"}
+                `}
+                style={{
+                  minWidth: '120px',
+                  maxWidth: '100%',
+                  WebkitBackdropFilter: 'blur(12px) saturate(180%)',
+                  backdropFilter: 'blur(12px) saturate(180%)',
+                  whiteSpace: 'pre-line',
+                }}
+              >
+                <span className="capitalize w-full flex items-center justify-center text-center">{topic.name}</span>
+                {topic.description && (
+                  <span className="ml-2 text-xs text-black/60">{topic.description}</span>
+                )}
+              </motion.button>
+            );
+          })}
+        </div>
         <button
           type="button"
           onClick={handleSavePreferences}
           disabled={saving}
-          className="mt-4 px-6 py-2 rounded-lg bg-blue-500/80 dark:bg-blue-600/80 hover:bg-blue-600 dark:hover:bg-blue-700 text-white font-semibold shadow-lg transition-colors duration-200 text-base backdrop-blur-xl border border-white/30 dark:border-white/10"
+          className="mt-4 px-6 py-2 rounded-lg bg-blue-500/80 hover:bg-blue-600 text-white font-semibold shadow-lg transition-colors duration-200 text-base backdrop-blur-xl border border-white/30"
         >
           {saving ? "Saving..." : "Save"}
         </button>
         {feedback && (
-          <div className="text-center text-sm mt-2 text-green-600 dark:text-green-400">{feedback}</div>
+          <div className="text-center text-sm mt-2 text-green-600">{feedback}</div>
         )}
       </form>
     </div>

@@ -29,7 +29,7 @@ jobs:
 
       - name: Run ai_pipeline.py
         env:
-          GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/backend/firebase_key.json }
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/backend/firebase_key.json
           FIREBASE_SERVICE_ACCOUNT_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}
           THENEWS_API_TOKEN: ${{ secrets.THENEWS_API_TOKEN }}
           BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}

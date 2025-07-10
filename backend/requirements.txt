@@ -8,4 +8,3 @@ python-dotenv==1.0.0
 sentence-transformers>=2.2.0
 lxml_html_clean
 lxml[html_clean]
-sib-api-v3-sdk>=8.0.0

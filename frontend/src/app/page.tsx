@@ -6,11 +6,7 @@ import Button from "./components/Button";
 import { useAuth } from "../contexts/AuthContext";
 
 export default function Home() {
-  const { user, loading, logout } = useAuth();
-
-  const handleLogout = async () => {
-    await logout();
-  };
+  const { user, loading } = useAuth();
 
   return (
     <main className="flex flex-col items-center justify-center min-h-[80vh]">

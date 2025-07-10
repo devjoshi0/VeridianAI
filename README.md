@@ -72,17 +72,22 @@ flowchart TD
 
 ---
 
-## Screenshots & Suggested Images
+## Screenshots
 
-- **Landing Page:** Screenshot of the animated, glassmorphic welcome screen.
-- **Topic Selection:** Screenshot of the topic selection dashboard with animated buttons.
-- **Newsletter Example:** Screenshot or mockup of a generated newsletter (web or email view).
-- **Architecture Diagram:** (see above Mermaid diagram)
-- **Suggested Icons/Images:**
-  - AI/robot icon for summarization
-  - Newspaper or newsletter icon
-  - User avatar for personalization
-  - Globe or world map for news coverage
+![A9C27A90-AE44-418F-91E5-A2107ECC4BB5](https://github.com/user-attachments/assets/60ce7a7b-cfc1-4cca-96c4-a8902b992688)
+
+
+**Login Screen**
+![login](https://github.com/user-attachments/assets/b77c859d-4865-4809-923c-28cfef46cc21)
+
+**Settings Page**
+![settings](https://github.com/user-attachments/assets/0652aba5-9f41-4c5a-8660-08290f6dc5d0)
+
+
+**Newsletter Early Examples. (Subject to change with each release)**
+![IMG_2830](https://github.com/user-attachments/assets/6beb9e2b-115f-425d-88e2-e556b58221f8)
+
+Currently working on implementing the images into the newsletter as well as updating the structure of the newsletter to fit the theme of the website
 
 ---
 

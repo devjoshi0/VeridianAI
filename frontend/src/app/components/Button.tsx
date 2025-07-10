@@ -7,7 +7,7 @@ type ButtonProps = {
   children: ReactNode;
   onClick?: MouseEventHandler<HTMLButtonElement>;
   variant?: "primary" | "secondary";
-  [key: string]: unknown;
+  [key: string]: any;
 };
 
 export default function Button({ children, onClick, variant = "primary", ...props }: ButtonProps) {

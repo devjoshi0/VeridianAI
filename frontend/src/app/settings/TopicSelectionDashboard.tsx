@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { collection, getDocs, doc, getDoc, updateDoc } from "firebase/firestore";
 import { firestore } from "../../../lib/firebase";
 import { useAuth } from "../../contexts/AuthContext";
 import { motion } from "framer-motion";
@@ -28,6 +28,11 @@ export default function TopicSelectionDashboard() {
 
     // Fetch master topics
     const fetchTopics = async () => {
+      // const topicsSnap = await getDocs(collection(firestore, "topics"));
+      // const topics: Topic[] = [];
+      // topicsSnap.forEach(doc => {
+      //   topics.push({ id: doc.id, ...doc.data() } as Topic);
+      // });
       setAvailableTopics(topics.map(topic => ({ id: topic, name: topic })));
 
       // Fetch user preferences
@@ -42,7 +47,7 @@ export default function TopicSelectionDashboard() {
     };
 
     fetchTopics();
-  }, [user, topics]);
+  }, [user]);
 
   const handleCheckboxChange = (topicName: string) => {
     setUserSelectedTopics(prev => {
@@ -65,7 +70,7 @@ export default function TopicSelectionDashboard() {
         topics: Array.from(userSelectedTopics),
       });
       setFeedback("Preferences saved!");
-    } catch {
+    } catch (err) {
       setFeedback("Failed to save preferences.");
     }
     setSaving(false);

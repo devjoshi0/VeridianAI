@@ -58,8 +58,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const result = await signInWithEmailAndPassword(auth, email, password);
       console.log("Login success:", result.user.uid);
       return true;
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Login failed');
+    } catch (err: any) {
+      setError(err.message);
       console.error("Login error:", err);
       return false;
     } finally {
@@ -80,8 +80,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       });
       console.log("Register success:", userCredential.user.uid);
       return true;
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Registration failed');
+    } catch (err: any) {
+      setError(err.message);
       console.error("Register error:", err);
       return false;
     } finally {
@@ -94,8 +94,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setError(null);
     try {
       await signOut(auth);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Logout failed');
+    } catch (err: any) {
+      setError(err.message);
     } finally {
       setLoading(false);
     }

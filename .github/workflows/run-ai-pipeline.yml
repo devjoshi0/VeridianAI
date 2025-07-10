@@ -2,7 +2,7 @@ name: Run AI Pipeline Every 24 Hours
 
 on:
   schedule:
-    - cron: '0 0 * * *'  # Runs every day at midnight UTC
+    - cron: '0 8 * * *'  # Runs every day at 8 UTC
   workflow_dispatch:      # Allows manual trigger
 
 jobs:

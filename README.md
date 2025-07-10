@@ -8,6 +8,8 @@
 
 VeridianAI is an end-to-end platform that delivers personalized, AI-generated news summaries to users based on their selected topics. The system leverages state-of-the-art NLP models and a modern web stack to automate news aggregation, summarization, and delivery, providing a seamless and engaging user experience.
 
+If you want to see the deployed app, go to [VeridianAI](https://verdianai.vercel.app). Sign up now and enjoy free newsletters every morning at 8am EST and catch up on your interested topics in a quick bite sized read!
+
 ---
 
 ## Table of Contents
@@ -18,7 +20,6 @@ VeridianAI is an end-to-end platform that delivers personalized, AI-generated ne
 - [Screenshots & Suggested Images](#screenshots--suggested-images)
 - [Getting Started](#getting-started)
 - [Folder Structure](#folder-structure)
-- [For Recruiters](#for-recruiters)
 - [License](#license)
 
 ---
@@ -49,7 +50,7 @@ VeridianAI is an end-to-end platform that delivers personalized, AI-generated ne
 ### **Backend**
 - **Language:** Python 3
 - **AI/NLP:** Hugging Face Transformers (`facebook/bart-large-cnn`), Sentence Transformers (`all-MiniLM-L6-v2`)
-- **News Parsing:** newspaper3k
+- **News Parsing:** newspaper3k and thenewsapi
 - **Database:** Google Firestore (via `firebase-admin`)
 - **Environment:** python-dotenv
 - **Email Delivery:** Brevo (Sendinblue) API
@@ -72,17 +73,22 @@ flowchart TD
 
 ---
 
-## Screenshots & Suggested Images
+## Screenshots
 
-- **Landing Page:** Screenshot of the animated, glassmorphic welcome screen.
-- **Topic Selection:** Screenshot of the topic selection dashboard with animated buttons.
-- **Newsletter Example:** Screenshot or mockup of a generated newsletter (web or email view).
-- **Architecture Diagram:** (see above Mermaid diagram)
-- **Suggested Icons/Images:**
-  - AI/robot icon for summarization
-  - Newspaper or newsletter icon
-  - User avatar for personalization
-  - Globe or world map for news coverage
+![A9C27A90-AE44-418F-91E5-A2107ECC4BB5](https://github.com/user-attachments/assets/60ce7a7b-cfc1-4cca-96c4-a8902b992688)
+
+
+**Login Screen**
+![login](https://github.com/user-attachments/assets/b77c859d-4865-4809-923c-28cfef46cc21)
+
+**Settings Page**
+![settings](https://github.com/user-attachments/assets/0652aba5-9f41-4c5a-8660-08290f6dc5d0)
+
+
+**Newsletter Early Examples. (Subject to change with each release)**
+![IMG_2830](https://github.com/user-attachments/assets/6beb9e2b-115f-425d-88e2-e556b58221f8)
+
+Currently working on implementing the images into the newsletter as well as updating the structure of the newsletter to fit the theme of the website
 
 ---
 
@@ -124,13 +130,6 @@ AI Newsletter Project/
   frontend/        # Next.js React app, user auth, topic selection, UI
 ```
 
----
-
-## For Recruiters
-
-- **Software Engineering:** Demonstrates full-stack skills, cloud integration, and modern UI/UX.
-- **AI Engineering:** End-to-end NLP pipeline, model orchestration, and scalable summarization.
-- **Extensible:** Easily add new topics, models, or delivery channels.
 
 ---
 

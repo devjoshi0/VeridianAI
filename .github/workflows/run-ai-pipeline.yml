@@ -23,6 +23,12 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r backend/requirements.txt
 
+      - name: Set up Firebase credentials
+        run: |
+          echo "${{ secrets.FIREBASE_CREDENTIALS }}" > backend/firebase_key.json
+
       - name: Run ai_pipeline.py
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/backend/firebase_key.json
         run: |
           python backend/ai_pipeline.py

@@ -25,7 +25,7 @@ jobs:
 
       - name: Set up Firebase credentials
         run: |
-          echo "${{ secrets.FIREBASE_CREDENTIALS }}" > backend/firebase_key.json
+          printf "%b" "${{ secrets.FIREBASE_CREDENTIALS }}" > backend/firebase_key.json
 
       - name: Run ai_pipeline.py
         env:

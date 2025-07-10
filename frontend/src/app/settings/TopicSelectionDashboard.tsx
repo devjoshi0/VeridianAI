@@ -20,14 +20,13 @@ export default function TopicSelectionDashboard() {
   const [saving, setSaving] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
 
-  const topics = ['general', 'science', 'sports', 'tech', 'entertainment'];
-
   useEffect(() => {
     if (!user) return;
     setIsLoading(true);
 
     // Fetch master topics
     const fetchTopics = async () => {
+      const topics = ['general', 'science', 'sports', 'tech', 'entertainment'];
       setAvailableTopics(topics.map(topic => ({ id: topic, name: topic })));
 
       // Fetch user preferences
@@ -42,7 +41,7 @@ export default function TopicSelectionDashboard() {
     };
 
     fetchTopics();
-  }, [user, topics]);
+  }, [user]);
 
   const handleCheckboxChange = (topicName: string) => {
     setUserSelectedTopics(prev => {
